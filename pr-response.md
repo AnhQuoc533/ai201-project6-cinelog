@@ -10,11 +10,13 @@
 **How I verified:** Seed some sample data to the database via `sqlite3`, run the application and try to save a film to an existing watchlist via `curl` API request. The site ran smoothly as expected and without errors.
 
 ## Comment 2 — Deduplication
-> What happens if a user calls this with a film that's already on their watchlist? The current implementation would add a duplicate entry. Please handle this case.
+> What happens if a user calls `add_to_watchlist()` with a film that's already on their watchlist? The current implementation would add a duplicate entry. Please handle this case.
 
-**What I did:**
-**Reasoning:**
-**How I verified:**
+**What I did:** As I compared code implementation of the only two services, watchlist and collection, I noticed that the collection service implemented a duplication check that raises an exception message and prevents user from adding the same film, while the other did not. To address this, I add similar deduplication implementation in watchlist service, particularly in `add_to_watchlist()` function.
+
+**Reasoning:** Since watchlist and collection services have similar functionality, they should follow the same deduplication behavior. From both a logical and user experience perspective, the same film should not be allowed to be added to a watchlist more than once.
+
+**How I verified:** Using the database I have established earlier, I repeatedly attempted to add a random film into an existing playlist and the system responded with exception error after the first result. This behavior is expected and correct, confirming that the deduplication logic was functioning well. I also tried with other film item and the same result appeared.
 
 ## Comment 3 — Missing test
 > Please add a test for the case where `film_id` doesn't exist in the database. Look at the existing tests in `test_collection.py` — the pattern is there.
