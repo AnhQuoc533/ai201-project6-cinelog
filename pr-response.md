@@ -9,6 +9,7 @@
 
 **How I verified:** Seed some sample data to the database via `sqlite3`, run the application and try to save a film to an existing watchlist via `curl` API request. The site ran smoothly as expected and without errors.
 
+
 ## Comment 2 — Deduplication
 > What happens if a user calls `add_to_watchlist()` with a film that's already on their watchlist? The current implementation would add a duplicate entry. Please handle this case.
 
@@ -18,12 +19,16 @@
 
 **How I verified:** Using the database I have established earlier, I repeatedly attempted to add a random film into an existing playlist and the system responded with exception error after the first result. This behavior is expected and correct, confirming that the deduplication logic was functioning well. I also tried with other film item and the same result appeared.
 
+
 ## Comment 3 — Missing test
 > Please add a test for the case where `film_id` doesn't exist in the database. Look at the existing tests in `test_collection.py` — the pattern is there.
 
-**What I did:**
-**Reasoning:**
-**How I verified:**
+**What I did:** After reviewing the test suite of the collection service, I implemented a corresponding pytest framework for the watchlist service. This new suite includes tests for record count, non-existent film, correct film names, empty watchlist, deduplication, and several additional scenarios. It follows the same mechanism as the collection service's while containing additional test cases.
+
+**Reasoning:** Since watchlist and collection services have similar functionality, they should have similar,comparable test suite. This update also aligns with the existing project conventions defined in [CONTRIBUTING.md](CONTRIBUTING.md), which requires automated tests for every new feature.
+
+**How I verified:** I compare side by side with the test suite in `tests/test_collection.py` to ensure mine follows the same patterns and conventions. After that, I ran all the test cases. Even though the non-existent film test case along with 3 other test case passed, 5 test cases failed. Tracing the root case, I discovered that there was no relationship between `WatchlistEntry` and `Film`, which caused an error in `get_watchlist()` in watchlist service. Therefore, I will establish this relationship in the following commit, similar to the one between `Film` and `CollectionEntry`. 
+
 
 ## Comment 4 — Default visibility
 > I notice watchlists default to `public=True`. We don't have a documented decision on default visibility for user lists. Before I can approve this, I need you to add a note to your PR description explaining your reasoning. I want to make sure we're being intentional here, not just inheriting a default.
@@ -34,6 +39,7 @@
 
 **Tradeoff acknowledged:**
 
+
 ## Comment 5 — Sort order
 > I'd prefer watchlists to default to "date added" order rather than alphabetical. Most users want to see what they added recently. I'm open to discussion if you see it differently — but let's make a decision and document it.
 
@@ -43,6 +49,7 @@
 
 **Engagement with reviewer's point:**
 
+
 ## Comment 6 — Rebase
 > A refactor merged to `main` that changed film IDs from integers to UUIDs. Your watchlist code still references integer IDs. Please rebase on `main` and update accordingly.
 
@@ -51,13 +58,14 @@
 **Reasoning:**
 **How I verified no conflict remains:**
 
+
 ## PR Description
-<!-- Written at the end — feature overview, design decisions, manual testing steps -->
 ### Feature Overview
 
 ### Design Decisions
 
 ### Manual Testing Steps
+
 
 ## AI Usage
 **Instance 1:**
