@@ -57,7 +57,7 @@ def get_watchlist(user_id):
         WatchlistEntry.query
         .filter_by(user_id=user_id)
         .join(Film)
-        .order_by(Film.title.asc())
+        .order_by(Film.date_added.asc())
         .all()
     )
 
