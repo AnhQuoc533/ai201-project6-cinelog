@@ -33,7 +33,7 @@
 ## Comment 4 — Default visibility
 > I notice watchlists default to `public=True`. We don't have a documented decision on default visibility for user lists. Before I can approve this, I need you to add a note to your PR description explaining your reasoning. I want to make sure we're being intentional here, not just inheriting a default.
 
-**My position:** Watchlist visibility should be set to public by default, but users can change to private at any time.
+**My position:** Set watchlist visibility to public by default. Users can change to private at any time.
 
 **Reasoning:** Watchlists are different from collection entries (watched films). A watchlist is a curated list of films you *recommend* or *want to discover*. They are shareable, social artifacts by default. Plus, we want to encourage users to discover what others are interested in, which adds social value to the platform. This approach is very much similar to what Spotify is doing. Users who want privacy can opt-out, but the default should enable discovery and recommendation-sharing as core features.
 
@@ -43,21 +43,24 @@
 ## Comment 5 — Sort order
 > I'd prefer watchlists to default to "date added" order rather than alphabetical. Most users want to see what they added recently. I'm open to discussion if you see it differently — but let's make a decision and document it.
 
-**My position:** Watchlists should be ordered *chronologically* rather than alphabetically.
+**My position:** Agree with the maintainer and sort watchlists *chronologically* rather than alphabetically.
 
-**Reasoning:** Your point about user behavior is correct and reasonable. When a user looks at their watchlist, their immediate instinct is *"what did I just add?"* or *"what's new on my list?"* Chronological order (newest first) directly satisfies that need, making the watchlist more convenient and user-friendly. Additionally, this change promotes consistency across the project. The collection service already sorts by `date_added` in descending order. Thus, it makes sense when the watchlist does the same. Matching the sort pattern reduces cognitive load for users switching between features. Alphabetical sorting was a convenience decision on my part, but it doesn't serve the actual user workflow as well as chronological ordering does.
+**Reasoning:** When a user looks at their watchlist, their immediate instinct is *"what did I just add?"* or *"what's new on my list?"* Chronological order (newest first) directly satisfies that need, making the watchlist more convenient and user-friendly. Additionally, this change promotes consistency across the project. The collection service already sorts by `date_added` in descending order. Thus, it makes sense when the watchlist does the same. Matching the sort pattern reduces cognitive load for users switching between features. Alphabetical sorting was a convenience decision on my part, but it doesn't serve the actual user workflow as well as chronological ordering does.
 
-**Engagement with reviewer's point:** I initially chose alphabetical sorting thinking it would make large watchlists easier to *search through*. But this is irrational. For actual searching, users can have the search feature in the UI. For browsing, they want to see what's current and relevant. From your feedback, I realized that the watchlist is a working list, not an archive. So chronological order is the right default. 
+**Engagement with reviewer's point:** I agree with your point. I initially chose alphabetical sorting thinking it would make large watchlists easier to search through. But this is irrational. For actual searching, users can have the search feature in the UI. For browsing, they want to see what's current and relevant. From your feedback, I realized that the watchlist is a working list, not an archive. So chronological order is the right default. 
 
-**What I did:**  I updated `get_watchlist()` in `services/watchlist_service.py` to sort by `WatchlistEntry.date_added DESC`.
+**What I did:**  I updated query in `get_watchlist()` function from `services/watchlist_service.py` to sort by query result by `WatchlistEntry.date_added DESC`. I also revised its docstring to reflect the update and refactored test for sorted films as the films were no longer sorted alphabetically.
 
 ## Comment 6 — Rebase
 > A refactor merged to `main` that changed film IDs from integers to UUIDs. Your watchlist code still references integer IDs. Please rebase on `main` and update accordingly.
 
-**What conflicted:**
-**How I resolved it:**
-**Reasoning:**
-**How I verified no conflict remains:**
+**What conflicted:** The `WatchlistEntry` in `models.py` was removed entirely, which corrupted the watchlist service. That class only existed on `feature/watchlist` branch.
+
+**How I resolved it:** I kept `WatchlistEntry` class as-is for the conflict resolution. Then, I changed data type of `film_id` of that class to `db.String(36)`, updated docstring of `add_to_watchlist()` function in `services/watchlist_service.py`, and updated my test's fake ID from an integer to a fake UUID string.
+
+**Reasoning:** It is obvious that keeping `WatchlistEntry` is keeping watchlist feature alive. Additionally, minor changes in `film_id` data type, docstring, and test suite are important to reflect the film's UUID update from the main branch refactor.
+
+**How I verified no conflict remains:** I ran `git log --merges --oneline origin/main..HEAD` and saw nothing. This confirmed that my branch's history is fully linear with no merge commits. Finally, I ran all the test suites and everything passed.
 
 
 ## PR Description
