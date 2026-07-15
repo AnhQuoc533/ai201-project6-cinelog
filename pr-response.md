@@ -1,4 +1,13 @@
 # PR Response Doc — CineLog Watchlist Feature
+## AI Usage
+* *AI Tool:* Claude Code.
+
+* *What I gave the AI:* The source code of `services/watchlist.py` and `tests/test_collection.py` (as a code pattern to follow), a request to create a comprehensive pytest framework for testing all functions in `services/watchlist.py`, following the same pytest pattern and conventions used in `tests/test_collection.py`.
+
+* *What it produced:* A complete test suite in `tests/test_watchlist.py` with 14 test cases, organized into six logical groups.
+
+* *What I changed or overrode:* I refactored several test function names to improve clarity and consistency. More importantly, followin watchlist ordering decision and main branch rebase, I updated the test cases for sorted films and non-existent film to reflect new behavior change. Specifically, `test_sorted_films_by_date_added` now expects films ordered by most-recently-added first, and `test_add_to_watchlist_nonexistent_film_raises` now uses a UUID string instead of an integer for the fake film ID.
+
 
 ## Comment 1 — Rename
 > `save_to_watchlist()` should follow the project's naming convention. Compare with `add_to_collection()` — the pattern here is `verb_to_noun`. Please rename to `add_to_watchlist()` and update all call sites.
@@ -114,23 +123,68 @@ The watchlist test suite follows the same pytest patterns and conventions used i
 - `test_remove_from_empty_watchlist_raises`: Tests edge case of removing from an empty watchlist.
 
 
-### Watchlist Visibility Toggle
-
-
-
 ## PR Description
+
 ### Feature Overview
+This PR introduces a complete **Watchlist** feature for CineLog. A watchlist is a curated list of films users want to *recommend* or *discover*. They are shareable artifacts which adds social value to the platform.
+
+The feature includes:
+- **Add to Watchlist:** Users can add films to their personal watchlist with deduplication to prevent duplicate entries
+- **View Watchlist:** Retrieve all films on a user's watchlist, sorted chronologically (newest additions first) with full film metadata
+- **Remove from Watchlist:** Remove films from the watchlist when they've been watched or are no longer of interest
+- **Visibility Control:** Watchlists default to public, allowing users to share their watch-later recommendations with the community, with the option to set entries as private
+- **Data Isolation:** Each user only sees and manages their own watchlist entries
+
+The watchlist service follows the functionality and patterns of the existing collection service, ensuring consistency and maintainability across the platform while serving a different user need.
+
 
 ### Design Decisions
+- **Sort Order: Chronological (Newest First)**  
+Watchlists are sorted by `date_added DESC` rather than alphabetically. This respects actual user behavior. When checking a watchlist, users want to see what they *just* added, not browse alphabetically. This also maintains consistency with the collection service's sort order.
+
+- **Default Visibility: Public**  
+Watchlists default to `public=True` because they are shareable, social artifacts. They reflect user recommendations and interests. This decision promotes community value and CineLog's identity as a community film platform.
+
 
 ### Manual Testing Steps
+**Prerequisites:**
+1. Set up the environment: run `python -m venv .venv` to create a python virtual environment and activate it.
+2. Download dependencies: `pip install -r requirements.txt`.
+3. Run the application: `flask --app app run`
+4. Seed a user and a film to the database using `sqlite3`.
 
+**Test 1: Add a Film to Watchlist**
+1. Call POST `/watchlist/add` with `user_id` and `film_id`
+2. Verify the response includes the new `WatchlistEntry` with `date_added` and `public` fields
+3. Confirm the film appears in GET `/watchlist/{user_id}`
 
-## AI Usage
-* *AI Tool:* Claude Code.
+**Test 2: Verify Deduplication**
+1. Add the same film to the watchlist twice
+2. Verify the second attempt returns a 400 error with message about `AlreadyInWatchlistError`
+3. Confirm only one entry exists in the database
 
-* *What I gave the AI:* The source code of `services/watchlist.py` and `tests/test_collection.py` (as a code pattern to follow), a request to create a comprehensive pytest framework for testing all functions in `services/watchlist.py`, following the same pytest pattern and conventions used in `tests/test_collection.py`.
+**Test 3: View Watchlist (Sorted Chronologically)**
+1. Add 3 films to your watchlist at different times
+2. Call GET `/watchlist/{user_id}`
+3. Verify films are returned in reverse chronological order (most recent first)
+4. Verify each film includes title, year, genre, director, and watchlist metadata (date_added, public)
 
-* *What it produced:* A complete test suite in `tests/test_watchlist.py` with 9 test cases, organized into five logical groups.
+**Test 4: Remove a Film from Watchlist**
+1. Add a film to your watchlist
+2. Call DELETE `/watchlist/remove` with `user_id` and `film_id`
+3. Verify the response indicates successful removal
+4. Call GET `/watchlist/{user_id}` and confirm the film no longer appears
 
-* *What I changed or overrode:* I refactored some of the test function names but more importantly, after watchlist ordering decision and main branch rebase, I fixed two of the test cases for sorted films and non-existent film to reflect the change. Specifically, `test_sorted_films_by_date_added` now expects films ordered by most-recently-added first, and `test_add_to_watchlist_nonexistent_film_raises` now uses a UUID string instead of an integer for the fake film ID.
+**Test 5: Error Cases**
+- Try to add a non-existent film → verify `FilmNotFoundError`
+- Try to remove a film that's not in your watchlist → verify `NotInWatchlistError`
+- View watchlist with non-existent user ID → verify empty list is returned
+
+**Test 6: Data Isolation**
+1. Create two user accounts
+2. Have user A add Film X and Film Y to their watchlist
+3. Have user B add Film Y and Film Z to their watchlist
+4. Verify user A's watchlist contains only Film X and Film Y
+5. Verify user B's watchlist contains only Film Y and Film Z
+
+**Test Suite Execution:** `pytest tests/test_watchlist.py -v` → all 14 tests should pass.
