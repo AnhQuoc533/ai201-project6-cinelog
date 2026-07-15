@@ -10,6 +10,12 @@ from services.collection_service import FilmNotFoundError
 
 
 class AlreadyInWatchlistError(Exception):
+    """Raised when a film is already in the user's watchlist."""
+    pass
+
+
+class NotInWatchlistError(Exception):
+    """Raised when trying to remove a film that isn't in the watchlist."""
     pass
 
 
@@ -68,3 +74,26 @@ def get_watchlist(user_id):
         result.append(film_dict)
 
     return result
+
+
+def remove_from_watchlist(user_id, film_id):
+    """
+    Remove a film from a user's watchlist.
+
+    Args:
+        user_id (str): UUID of the user.
+        film_id (str): UUID of the film.
+
+    Returns:
+        bool: True if the entry was removed.
+
+    Raises:
+        NotInWatchlistError: If the film is not in the user's watchlist.
+    """
+    entry = WatchlistEntry.query.filter_by(user_id=user_id, film_id=film_id).first()
+    if WatchlistEntry.query.filter_by(user_id=user_id, film_id=film_id).first() is None:
+        raise NotInWatchlistError(f"Film '{film_id}' is not in this user's watchlist")
+
+    db.session.delete(entry)
+    db.session.commit()
+    return True

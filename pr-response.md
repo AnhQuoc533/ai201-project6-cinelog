@@ -64,7 +64,21 @@
 
 
 ## Stretch Features
+
 ### Film Removal in Watchlist
+**Overview:**
+Implemented the ability for users to remove films from their watchlist. This completes the full CRUD lifecycle for watchlist management and synchronizes the watchlist service with the collection service. It also allows users to manage their watch-later lists by adding and removing films as their interests change.
+
+**Implementation:**
+- Added `remove_from_watchlist()` function to `services/watchlist_service.py` that follow similar code patterns and conventions in `services/collection_service.py`.
+- Added error handling with a new `NotInWatchlistError` exception and employed it in `remove_from_watchlist()`. When a user removes a film that was never added to their watchlist or when the watchlist entry does not exist in the database, this exception will be raised.
+
+**User Experience Benefits:**
+- Users can change their minds and remove films from their watchlist without friction
+- Allows watchlists to stay current and relevant by removing films that have been watched or are no longer of interest
+- Provides immediate feedback through exceptions instead of silent failures
+- Maintains data integrity by preventing orphaned or duplicate entries when films are removed and re-added
+
 
 ### Extended Watchlist Test
 
