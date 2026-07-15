@@ -91,7 +91,7 @@ def remove_from_watchlist(user_id, film_id):
         NotInWatchlistError: If the film is not in the user's watchlist.
     """
     entry = WatchlistEntry.query.filter_by(user_id=user_id, film_id=film_id).first()
-    if WatchlistEntry.query.filter_by(user_id=user_id, film_id=film_id).first() is None:
+    if entry is None:
         raise NotInWatchlistError(f"Film '{film_id}' is not in this user's watchlist")
 
     db.session.delete(entry)
