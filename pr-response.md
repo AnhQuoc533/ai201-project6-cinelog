@@ -93,7 +93,6 @@ The watchlist test suite follows the same pytest patterns and conventions used i
 - `test_watchlist_only_returns_user_films`: Ensures data isolation—that `get_watchlist()` only returns films for the specified user, not films from other users' watchlists.
 
 
-
 ### Watchlist Visibility Toggle
 
 
@@ -107,13 +106,10 @@ The watchlist test suite follows the same pytest patterns and conventions used i
 
 
 ## AI Usage
-**Instance 1:**
-* *What I gave the AI:* 
-* *What it produced:* 
-* *What I changed or overrode:*
+* *AI Tool:* Claude Code.
 
+* *What I gave the AI:* The source code of `services/watchlist.py` and `tests/test_collection.py` (as a code pattern to follow), a request to create a comprehensive pytest framework for testing all functions in `services/watchlist.py`, following the same pytest pattern and conventions used in `tests/test_collection.py`.
 
-**Instance 2:**
-* *What I gave the AI:* 
-* *What it produced:*
-* *What I changed or overrode:*
+* *What it produced:* A complete test suite in `tests/test_watchlist.py` with 9 test cases, organized into five logical groups.
+
+* *What I changed or overrode:* I refactored some of the test function names but more importantly, after watchlist ordering decision and main branch rebase, I fixed two of the test cases for sorted films and non-existent film to reflect the change. Specifically, `test_sorted_films_by_date_added` now expects films ordered by most-recently-added first, and `test_add_to_watchlist_nonexistent_film_raises` now uses a UUID string instead of an integer for the fake film ID.
