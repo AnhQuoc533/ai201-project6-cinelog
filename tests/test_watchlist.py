@@ -8,12 +8,7 @@ Follows the same patterns as test_collection.py.
 import pytest
 from app import create_app, db
 from models import User, Film, WatchlistEntry
-from services.watchlist_service import (
-    add_to_watchlist,
-    get_watchlist,
-    FilmNotFoundError,
-    AlreadyInWatchlistError,
-)
+from services.watchlist_service import *
 
 
 @pytest.fixture
@@ -222,3 +217,96 @@ def test_watchlist_only_returns_user_films(app, sample_user):
 
         assert len(watchlist_user2) == 1
         assert watchlist_user2[0]["title"] == "Movie B"
+
+
+# ── Removal ─────────────────────────────────────────────────────────────────
+
+def test_remove_from_watchlist_deletes_entry(app, sample_user, sample_film):
+    """
+    Removing a film from watchlist should delete the WatchlistEntry from the database.
+    """
+    with app.app_context():
+        add_to_watchlist(user_id=sample_user, film_id=sample_film)
+
+        result = remove_from_watchlist(user_id=sample_user, film_id=sample_film)
+
+        assert result is True
+
+        # Verify it was deleted from database
+        in_db = WatchlistEntry.query.filter_by(
+            user_id=sample_user, film_id=sample_film
+        ).first()
+        assert in_db is None
+
+
+def test_remove_from_watchlist_film_not_found(app, sample_user):
+    """
+    Removing a film that is not in the watchlist should raise NotInWatchlistError.
+    """
+    with app.app_context():
+        fake_film_id = "00000000-0000-0000-0000-000000000000"
+
+        with pytest.raises(NotInWatchlistError):
+            remove_from_watchlist(user_id=sample_user, film_id=fake_film_id)
+
+
+def test_remove_decreases_watchlist_count(app, sample_user):
+    """
+    After removing a film, get_watchlist() should return one fewer film.
+    """
+    with app.app_context():
+        film_1 = Film(title="Film 1", year=2020, genre="Action")
+        film_2 = Film(title="Film 2", year=2021, genre="Drama")
+        db.session.add_all([film_1, film_2])
+        db.session.commit()
+
+        add_to_watchlist(user_id=sample_user, film_id=film_1.id)
+        add_to_watchlist(user_id=sample_user, film_id=film_2.id)
+
+        watchlist_before = get_watchlist(sample_user)
+        assert len(watchlist_before) == 2
+
+        remove_from_watchlist(user_id=sample_user, film_id=film_1.id)
+
+        watchlist_after = get_watchlist(sample_user)
+        assert len(watchlist_after) == 1
+        assert watchlist_after[0]["title"] == "Film 2"
+
+
+def test_remove_only_affects_user_watchlist(app, sample_user):
+    """
+    Removing a film from one user's watchlist should not affect other users' watchlists.
+    """
+    with app.app_context():
+        user_2 = User(username="otheruser", email="other@example.com")
+        db.session.add(user_2)
+        db.session.commit()
+
+        film = Film(title="Shared Movie", year=2020, genre="Action")
+        db.session.add(film)
+        db.session.commit()
+
+        add_to_watchlist(user_id=sample_user, film_id=film.id)
+        add_to_watchlist(user_id=user_2.id, film_id=film.id)
+
+        remove_from_watchlist(user_id=sample_user, film_id=film.id)
+
+        watchlist_user1 = get_watchlist(sample_user)
+        watchlist_user2 = get_watchlist(user_2.id)
+
+        assert len(watchlist_user1) == 0
+        assert len(watchlist_user2) == 1
+        assert watchlist_user2[0]["title"] == "Shared Movie"
+
+
+def test_remove_from_empty_watchlist_raises(app, sample_user):
+    """
+    Removing a film from an empty watchlist should raise NotInWatchlistError.
+    """
+    with app.app_context():
+        film = Film(title="Movie", year=2020, genre="Action")
+        db.session.add(film)
+        db.session.commit()
+
+        with pytest.raises(NotInWatchlistError):
+            remove_from_watchlist(user_id=sample_user, film_id=film.id)

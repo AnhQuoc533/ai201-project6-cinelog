@@ -71,6 +71,7 @@ Implemented the ability for users to remove films from their watchlist. This com
 
 **Implementation:**
 - Added `remove_from_watchlist()` function to `services/watchlist_service.py` that follow similar code patterns and conventions in `services/collection_service.py`.
+- Added **5 comprehensive test cases** covering this removal functionality.
 - Added error handling with a new `NotInWatchlistError` exception and employed it in `remove_from_watchlist()`. When a user removes a film that was never added to their watchlist or when the watchlist entry does not exist in the database, this exception will be raised.
 
 **User Experience Benefits:**
@@ -81,11 +82,10 @@ Implemented the ability for users to remove films from their watchlist. This com
 
 
 ### Extended Watchlist Test
-
-**Total Test Count:** 9 test cases in `tests/test_watchlist.py`
+**Total Test Count:** 14 test cases in `tests/test_watchlist.py`
 
 **Overview:**
-The watchlist test suite follows the same pytest patterns and conventions used in `tests/test_collection.py`, providing comprehensive coverage of the watchlist service functionality. Tests are organized into five logical groups:
+The watchlist test suite follows the same pytest patterns and conventions used in `tests/test_collection.py`, providing comprehensive coverage of the watchlist service functionality. Tests are organized into six logical groups:
 
 **1. Basic Add Functionality (2 tests)**
 - `test_add_to_watchlist`: Verifies that adding a valid film to a user's watchlist creates a `WatchlistEntry` in the database and persists correctly.
@@ -105,6 +105,13 @@ The watchlist test suite follows the same pytest patterns and conventions used i
 - `test_watchlist_returns_correct_film_names`: Validates that all films added to the watchlist are present in the retrieved list with correct titles.
 - `test_empty_watchlist`: Tests the edge case where a user with no watchlist entries receives an empty list (not an error).
 - `test_watchlist_only_returns_user_films`: Ensures data isolation—that `get_watchlist()` only returns films for the specified user, not films from other users' watchlists.
+
+**6. Removal Functionality (5 tests)**
+- `test_remove_from_watchlist_deletes_entry`: Verifies that removing a valid film deletes the `WatchlistEntry` from the database and returns `True`.
+- `test_remove_from_watchlist_film_not_found`: Ensures `NotInWatchlistError` is raised when attempting to remove a non-existent entry.
+- `test_remove_decreases_watchlist_count`: Confirms watchlist count decreases after removal with correct remaining films.
+- `test_remove_only_affects_user_watchlist`: Validates that removal only affects the specified user's watchlist, not other users.
+- `test_remove_from_empty_watchlist_raises`: Tests edge case of removing from an empty watchlist.
 
 
 ### Watchlist Visibility Toggle
