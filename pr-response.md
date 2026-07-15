@@ -43,6 +43,13 @@
 ## Comment 5 — Sort order
 > I'd prefer watchlists to default to "date added" order rather than alphabetical. Most users want to see what they added recently. I'm open to discussion if you see it differently — but let's make a decision and document it.
 
+**My position:** Watchlists should be ordered *chronologically* rather than alphabetically.
+
+**Reasoning:** Your point about user behavior is correct and reasonable. When a user looks at their watchlist, their immediate instinct is *"what did I just add?"* or *"what's new on my list?"* Chronological order (newest first) directly satisfies that need, making the watchlist more convenient and user-friendly. Additionally, this change promotes consistency across the project. The collection service already sorts by `date_added` in descending order. Thus, it makes sense when the watchlist does the same. Matching the sort pattern reduces cognitive load for users switching between features. Alphabetical sorting was a convenience decision on my part, but it doesn't serve the actual user workflow as well as chronological ordering does.
+
+**Engagement with reviewer's point:** I initially chose alphabetical sorting thinking it would make large watchlists easier to *search through*. But this is irrational. For actual searching, users can have the search feature in the UI. For browsing, they want to see what's current and relevant. From your feedback, I realized that the watchlist is a working list, not an archive. So chronological order is the right default. 
+
+**What I did:**  I updated `get_watchlist()` in `services/watchlist_service.py` to sort by `WatchlistEntry.date_added DESC`.
 
 ## Comment 6 — Rebase
 > A refactor merged to `main` that changed film IDs from integers to UUIDs. Your watchlist code still references integer IDs. Please rebase on `main` and update accordingly.
