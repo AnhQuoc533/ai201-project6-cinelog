@@ -63,6 +63,41 @@
 **How I verified no conflict remains:** I ran `git log --merges --oneline origin/main..HEAD` and saw nothing. This confirmed that my branch's history is fully linear with no merge commits. Finally, I ran all the test suites and everything passed.
 
 
+## Stretch Features
+### Film Removal in Watchlist
+
+### Extended Watchlist Test
+
+**Total Test Count:** 9 test cases in `tests/test_watchlist.py`
+
+**Overview:**
+The watchlist test suite follows the same pytest patterns and conventions used in `tests/test_collection.py`, providing comprehensive coverage of the watchlist service functionality. Tests are organized into five logical groups:
+
+**1. Basic Add Functionality (2 tests)**
+- `test_add_to_watchlist`: Verifies that adding a valid film to a user's watchlist creates a `WatchlistEntry` in the database and persists correctly.
+- `test_get_watchlist`: Confirms that after adding a film to the watchlist, it can be retrieved via `get_watchlist()` with correct film metadata (title, year, genre, etc.).
+
+**2. Deduplication (1 test)**
+- `test_add_to_watchlist_duplicate_raises`: Ensures that attempting to add the same film twice to a user's watchlist raises `AlreadyInWatchlistError` and prevents duplicate entries in the database.
+
+**3. Error Handling (1 test)**
+- `test_add_to_watchlist_nonexistent_film_raises`: Validates that adding a `film_id` that doesn't exist in the database raises `FilmNotFoundError` before any database operation occurs.
+
+**4. Sort Order Verification (1 test)**
+- `test_sorted_films_by_date_added`: Verifies that `get_watchlist()` returns films sorted by `date_added` in descending order (most recently added first), ensuring users see their latest additions at the top.
+
+**5. Watchlist Count and Contents (4 tests)**
+- `test_watchlist_returns_correct_number_of_films`: Confirms that `get_watchlist()` returns the exact count of films a user has added.
+- `test_watchlist_returns_correct_film_names`: Validates that all films added to the watchlist are present in the retrieved list with correct titles.
+- `test_empty_watchlist`: Tests the edge case where a user with no watchlist entries receives an empty list (not an error).
+- `test_watchlist_only_returns_user_films`: Ensures data isolation—that `get_watchlist()` only returns films for the specified user, not films from other users' watchlists.
+
+
+
+### Watchlist Visibility Toggle
+
+
+
 ## PR Description
 ### Feature Overview
 
