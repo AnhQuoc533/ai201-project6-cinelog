@@ -13,7 +13,7 @@
 ## Comment 2 — Deduplication
 > What happens if a user calls `add_to_watchlist()` with a film that's already on their watchlist? The current implementation would add a duplicate entry. Please handle this case.
 
-**What I did:** As I compared code implementation of the only two services, watchlist and collection, I noticed that the collection service implemented a duplication check that raises an exception message and prevents user from adding the same film, while the other did not. To address this, I add similar deduplication implementation in watchlist service, particularly in `add_to_watchlist()` function.
+**What I did:** As I compared code implementation of the only two services, watchlist and collection, I noticed that the collection service implemented a duplication check that raises an exception message and prevents user from adding the same film, while the other did not. To address this, I add similar deduplication implementation in watchlist service, particularly in `add_to_watchlist()` function. This implementation also includes custom Exception class `AlreadyInWatchlistError` that will be raised when duplication happens.
 
 **Reasoning:** Since watchlist and collection services have similar functionality, they should follow the same deduplication behavior. From both a logical and user experience perspective, the same film should not be allowed to be added to a watchlist more than once.
 
@@ -33,21 +33,15 @@
 ## Comment 4 — Default visibility
 > I notice watchlists default to `public=True`. We don't have a documented decision on default visibility for user lists. Before I can approve this, I need you to add a note to your PR description explaining your reasoning. I want to make sure we're being intentional here, not just inheriting a default.
 
-**My decision:**
+**My position:** Watchlist visibility should be set to public by default, but users can change to private at any time.
 
-**Reasoning:**
+**Reasoning:** Watchlists are different from collection entries (watched films). A watchlist is a curated list of films you *recommend* or *want to discover*. They are shareable, social artifacts by default. Plus, we want to encourage users to discover what others are interested in, which adds social value to the platform. This approach is very much similar to what Spotify is doing. Users who want privacy can opt-out, but the default should enable discovery and recommendation-sharing as core features.
 
-**Tradeoff acknowledged:**
+**Tradeoff acknowledged:** The alternative approach, `public=False`, would prioritize privacy and require users to explicitly opt-in to sharing. This is a valid safety-first approach, especially in early product stages. However, it risks making watchlists a hidden feature that doesn't generate network effects. The tradeoff is between *discovery and engagement* (public-first) versus *privacy-by-default*. As stated in [README.md](README.md), CineLog is a *community* film tracking platform. Therefore, discovery and social connection align with our goals and values.
 
 
 ## Comment 5 — Sort order
 > I'd prefer watchlists to default to "date added" order rather than alphabetical. Most users want to see what they added recently. I'm open to discussion if you see it differently — but let's make a decision and document it.
-
-**My position:**
-
-**Reasoning:**
-
-**Engagement with reviewer's point:**
 
 
 ## Comment 6 — Rebase
