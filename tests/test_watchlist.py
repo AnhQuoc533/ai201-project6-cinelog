@@ -118,9 +118,9 @@ def test_add_to_watchlist_nonexistent_film_raises(app, sample_user):
 
 # ── Sort order ──────────────────────────────────────────────────────────────
 
-def test_get_watchlist_returns_sorted_films(app, sample_user):
+def test_sorted_films_by_date_dadded(app, sample_user):
     """
-    get_watchlist() should return films sorted by title in ascending order.
+    get_watchlist() should return films sorted by date added in descending order.
     """
     with app.app_context():
         film_a = Film(title="Zebra", year=2020, genre="Drama")
@@ -136,8 +136,8 @@ def test_get_watchlist_returns_sorted_films(app, sample_user):
         watchlist = get_watchlist(sample_user)
         titles = [f["title"] for f in watchlist]
 
-        # Should be sorted alphabetically
-        assert titles == ["Alien", "Monkey Business", "Zebra"]
+        # Should be sorted chronologically
+        assert titles == ["Monkey Business", "Alien", "Zebra"]
 
 
 # ── Watchlist count and contents ────────────────────────────────────────────
